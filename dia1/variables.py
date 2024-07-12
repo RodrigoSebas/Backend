@@ -1,5 +1,5 @@
 nombre = "Rodrigo"
 
 edad = 22
-
-print(edad, nombre)
+edad = [121,21,212]
+print(len(edad))
