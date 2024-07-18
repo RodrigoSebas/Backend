@@ -1,0 +1,2 @@
+\l mostrar todas las bases de datos existentes en el servidor actual
+
