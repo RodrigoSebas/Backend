@@ -71,11 +71,11 @@ select count(*), tipo_moneda from cuentas group by tipo_moneda;
 
 -- Mostrar los numeros de cuenta y su tipo de moneda ordenados por la fecha de creacion del mas nuevo al mas viejo
 
-select numero_cuenta, tipo_moneda, fecha_creacion from cuentas order by fecha_creacion asc;
+select numero_cuenta, tipo_moneda, fecha_creacion from cuentas order by fecha_creacion desc;
 
 -- Cual es la cuenta con mayor mantenimiento 
 
-select max(mantenimiento) from cuentas;
+select numero_cuenta, mantenimiento from cuentas order by mantenimiento desc limit 1;
 
 -- Que cliente tiene mas cuentas
 

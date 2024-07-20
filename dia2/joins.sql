@@ -41,4 +41,4 @@ create table movimientos(
 alter table movimientos alter column cuenta_destino drop not null;
 
 --esto es para cambiar el nombre de la columna de una tabla
---alter table movimientos rename column fecha_operacion to fecha_transaccion;
+alter table movimientos rename column fecha_operacion to fecha_transaccion;
