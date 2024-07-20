@@ -75,3 +75,5 @@ FROM debitos
 FULL OUTER JOIN creditos ON debitos.cuenta = creditos.cuenta 
 ORDER BY cuenta;
 
+
+
