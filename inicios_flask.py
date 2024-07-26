@@ -54,6 +54,82 @@ def devolver_usuarios():
     }
 
 
+@app.route('/devolver-usuario/<int:id>',methods=['GET'])
+def devolverUsuario(id):
+    print(id)
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM usuarios WHERE id = %s",(id,))
+    usuario = cursor.fetchone()
+    print(usuario)
+    if usuario:
+        return {
+            'id':usuario[0],
+            'nombre':usuario[1],
+            'apellido':usuario[2],
+            'correo':usuario[3]
+        }
+    else:
+        return {
+            'message':"el usuario no existe"
+        }, 404
+    
+@app.route('/actualizar-usuario/<int:id>', methods=['PUT'])
+def actualizarUsuario(id):
+    cursor = conexion.cursor()
+    cursor.execute("SELECT id FROM usuarios WHERE id=%s",(id,))
+    usuario = cursor.fetchone()
+    if usuario:
+        data = request.get_json()
+        cursor.execute("update usuarios set nombre=%s, apellido=%s, correo=%s where id=%s",(
+            data['nombre'], data['apellido'], data['correo'],id))
+        conexion.commit()
+        cursor.close()
+        return {
+            "message":"usuario actualizado exitosamente"
+        }
+    else:
+        cursor.close()
+        return {
+            'message':"el usuario no existe"
+        }, 404
+
+@app.route("/eliminar-usuario/<string:id>",methods = ['DELETE'])
+def eliminarUsuario(id):
+    cursor = conexion.cursor()
+    print(id)
+    cursor.execute("SELECT id FROM usuarios WHERE id=%s",(id,))
+    usuario = cursor.fetchone()
+    if usuario:
+        cursor.execute("delete from usuarios where id=%s",(id,))
+        conexion.commit()
+        cursor.close()
+        return {
+            "message":"usuario eliminado exitosamente"
+        }
+    else:
+        cursor.close()
+        return {
+            'message':"el usuario no existe"
+        }, 404
+
+#leccion de sql injection
+@app.route("/devolver-productos", methods=['GET'])
+def devolverProductos():
+    query_params = request.args
+
+    nombre = query_params.get("nombre","")
+    cursor = conexion.cursor()
+    cursor.execute("select * from productos where nombre=%s and disponible=true",('yoyo',))
+    productos = cursor.fetchmany()
+    print(productos)
+
+    resultado=[]
+    for producto in productos:
+        resultado.append({"id":productos[0]
+            ,"nombre":productos[1]})
+    return{
+        'content': resultado
+    }
 
 
 
