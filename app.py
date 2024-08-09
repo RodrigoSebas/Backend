@@ -34,6 +34,9 @@ api.add_resource(ProductosController, '/productos')
 api.add_resource(RegistroController, '/registro')
 api.add_resource(LoginController,'/login')
 api.add_resource(PerfilController, '/perfil')
+api.add_resource(CambiarPasswordController, '/cambiar-password')
+api.add_resource(ResetearPasswordController, '/reset-password')
+
 if __name__=="__main__":
     app.run(debug=True)
 

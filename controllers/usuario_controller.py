@@ -1,12 +1,12 @@
 from models import UsuarioModel
 from instancias import conexion
 from flask_restful import Resource, request
-from serializers import RegistroSerializer, LoginSerializer
+from serializers import RegistroSerializer, LoginSerializer, ActualizarUsuarioSerializer, CambiarPasswordSerializer, ResetearPasswordSerializer
 from marshmallow.exceptions import ValidationError
 from bcrypt import gensalt,hashpw, checkpw
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import create_access_token,jwt_required, get_jwt_identity
-
+from utilitarios import enviarCorreo
 
 class RegistroController(Resource):
     def post(self):
@@ -88,7 +88,8 @@ class PerfilController(Resource):
     @jwt_required()
     def get(self):
         #devuelve el id del usuario o identificador de la token
-        identidad = get_jwt_identity()
+        identidad = get_jwt_identity() #obtiene el id del usuario actual
+
         print(identidad)
         usuarioEncontrado = conexion.session.query(UsuarioModel).where(UsuarioModel.id==identidad).first()
         serializador = RegistroSerializer()
@@ -96,3 +97,137 @@ class PerfilController(Resource):
         return {
             'content': resultado
         }
+    
+    @jwt_required()
+    def put(self):
+        identificador = get_jwt_identity()
+
+        usuarioEncontrado = conexion.session.query(UsuarioModel).where(UsuarioModel.id==identificador).first()
+        data = request.get_json()
+
+        if not usuarioEncontrado:
+            return {
+                'message':'El usuario no se encuentra en la base de datos'
+            },400
+
+        try:
+            serializador = ActualizarUsuarioSerializer()
+            dataValidada = serializador.load(data)
+
+            usuarioEncontrado.nombre = dataValidada.get("nombre")
+            conexion.session.commit()
+            
+            #esto es solo para tener todos los datos y no solo el nombre que seria con actualizarUsuarioSerializer
+            serializadorUsuario = RegistroSerializer()
+            resultado = serializadorUsuario.dump(usuarioEncontrado)
+
+            return {
+                'message': 'Usuario actualizado exitosamente',
+                'content':resultado
+            }
+
+        except ValidationError as error:
+            return {
+                'message':'Error al actualizar el usuario',
+                'content':error.args
+            },400
+        
+
+class CambiarPasswordController(Resource):
+    @jwt_required()
+    def put(self):
+        data = request.get_json()
+        identificador = get_jwt_identity()
+        serializador = CambiarPasswordSerializer()
+        try:
+            dataValidada = serializador.load(data)
+            usuarioEncontrado = conexion.session.query(UsuarioModel).where(UsuarioModel.id == identificador).first()
+
+            if not usuarioEncontrado:
+                return {
+                    'message':"Usuario no existe"
+                },404
+            
+            passwordAntigua = dataValidada.get('passwordAntigua')
+            passwordAntiguaBytes = bytes(passwordAntigua,'utf-8')
+            passwordActual = usuarioEncontrado.password
+            passwordActualBytes = bytes(passwordActual,'utf-8')
+            validacionPassword = checkpw(passwordAntiguaBytes,passwordActualBytes)
+
+            if validacionPassword == False:
+                return {
+                    'message':"Password antigua invalida"
+                },400
+            
+            salt = gensalt()
+            passwordNueva = dataValidada.get("passwordNueva")
+            passwordNuevaBytes = bytes(passwordNueva,'utf-8')
+            hash = hashpw(passwordNuevaBytes,salt)
+            hashString = hash.decode('utf-8')
+            
+            usuarioEncontrado.password = hashString
+
+            conexion.session.commit()
+
+            return {
+                'message':"Password actualizada exitosamente"
+            }
+            
+        except ValidationError as error:
+            return {
+                'message':'Error al cambiar la password',
+                'content':error.args
+            },400
+
+
+class ResetearPasswordController(Resource):
+    def post(self):
+        data = request.get_json()
+        serializer = ResetearPasswordSerializer()
+
+        try:
+            dataSerializada = serializer.load(data)
+            usuarioEncontrado = conexion.session.query(UsuarioModel).where(UsuarioModel.correo==dataSerializada.get("correo")).first()
+            
+            if not usuarioEncontrado:
+                return {
+                    'message':'El usuario no existe en la base de datos'
+                },400
+            
+            textocorreo = """
+Hola {},
+Has solicitado el cambio de la password de tu cuenta en Tienditapp, si no has sido tu omite este mensaje.
+
+Gracias,
+
+Atentamente.
+
+El equipo mas chevere de todos"""
+
+            htmlCorreo = """
+<html>
+<body>
+<p>Hola <b>{}</b>, <br>
+Has solicitado el cambio de la password de tu cuenta en Tienditapp, si no has sido tu omite este mensaje.
+
+Gracias,
+
+Atentamente.
+
+El equipo mas chevere de todos
+</p>
+</body>
+</html>
+"""
+            enviarCorreo(usuarioEncontrado.correo,'Has solicitado el cambio de password',textocorreo,htmlCorreo)
+
+            return {
+                'message':'Reset completado exitosamente'
+            }
+        except ValidationError as error:
+            return {
+                'message':'Error al resetear la password',
+                'content':error.args
+            },400
+
+        

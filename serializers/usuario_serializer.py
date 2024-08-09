@@ -15,3 +15,15 @@ class RegistroSerializer(SQLAlchemyAutoSchema):
 class LoginSerializer(Schema):
     correo = fields.Email(required=True)
     password = fields.String(required=True)
+
+class ActualizarUsuarioSerializer(Schema):
+    nombre = fields.String(required=True)
+
+class CambiarPasswordSerializer(Schema):
+    passwordAntigua = fields.String(required=True)
+    #expresion regular para tener una password segura
+    passwordNueva = fields.String(required=True, validate=validate.Regexp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&?!])[A-Za-z\d@#$%^&?!]{6,}$"))
+
+class ResetearPasswordSerializer(Schema):
+    correo = fields.Email(required=True)
+    
