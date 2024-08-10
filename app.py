@@ -8,6 +8,7 @@ from controllers import *
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
+from flask_cors import CORS
 
 #variables de entorno
 load_dotenv()
@@ -17,7 +18,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = environ.get("DATABASE_URL")
 app.config['JWT_SECRET_KEY'] = environ.get("JWT_SECRET")
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1,minutes=10,seconds=5)
 
+CORS(app, origins='*', allow_headers='*', methods=['GET','POST','PUT','DELETE'])
+
 JWTManager(app)
+
 
 #definimos la api de nuestra aplicacion de flask
 api = Api(app)
@@ -36,6 +40,8 @@ api.add_resource(LoginController,'/login')
 api.add_resource(PerfilController, '/perfil')
 api.add_resource(CambiarPasswordController, '/cambiar-password')
 api.add_resource(ResetearPasswordController, '/reset-password')
+api.add_resource(ConfirmarResetTokenController, '/validar-token')
+api.add_resource(ConfirmarResetPasswordController, '/confirm-reset-password')
 
 if __name__=="__main__":
     app.run(debug=True)

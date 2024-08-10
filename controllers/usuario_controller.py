@@ -1,12 +1,13 @@
 from models import UsuarioModel
 from instancias import conexion
 from flask_restful import Resource, request
-from serializers import RegistroSerializer, LoginSerializer, ActualizarUsuarioSerializer, CambiarPasswordSerializer, ResetearPasswordSerializer
+from serializers import RegistroSerializer, LoginSerializer, ActualizarUsuarioSerializer, CambiarPasswordSerializer, ResetearPasswordSerializer, ConfirmarResetTokenSerializer, ConfirmarResetPasswordSerializer
 from marshmallow.exceptions import ValidationError
 from bcrypt import gensalt,hashpw, checkpw
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import create_access_token,jwt_required, get_jwt_identity
-from utilitarios import enviarCorreo
+from utilitarios import enviarCorreo, encriptarTexto, desencriptarTexto
+from json import loads, dumps
 
 class RegistroController(Resource):
     def post(self):
@@ -194,15 +195,28 @@ class ResetearPasswordController(Resource):
                     'message':'El usuario no existe en la base de datos'
                 },400
             
+            textoAEncriptar = {
+                'correo':usuarioEncontrado.correo
+            }
+            #dumps en el modulo json lo que hace es convierte un diccionario a un string
+            token = encriptarTexto(dumps(textoAEncriptar))
+            url = f'http://localhost:5000/reset-password-frontend?token={token}'
+            
             textocorreo = """
 Hola {},
-Has solicitado el cambio de la password de tu cuenta en Tienditapp, si no has sido tu omite este mensaje.
+Has solicitado el cambio de la password de tu cuenta en Tienditapp, haz click en el siguiente <a href="{}">link<a> para proceder
+<br>
+
+<br>
+si no has sido tu omite este mensaje.
+<br>
+<br>
 
 Gracias,
-
+<br>
 Atentamente.
 
-El equipo mas chevere de todos"""
+El equipo mas chevere de todos""".format(usuarioEncontrado.nombre,url)
 
             htmlCorreo = """
 <html>
@@ -219,7 +233,13 @@ El equipo mas chevere de todos
 </body>
 </html>
 """
-            enviarCorreo(usuarioEncontrado.correo,'Has solicitado el cambio de password',textocorreo,htmlCorreo)
+            
+           
+            plantillaCorreo = open('plantilla_mensajeria.html','r')
+            textoPlantilla = plantillaCorreo.read()
+            textoResultado = textoPlantilla.replace('cuerpo_correo',textocorreo)
+
+            enviarCorreo(usuarioEncontrado.correo,'Has solicitado el cambio de password',textocorreo,textoResultado)
 
             return {
                 'message':'Reset completado exitosamente'
@@ -230,4 +250,65 @@ El equipo mas chevere de todos
                 'content':error.args
             },400
 
+
+class ConfirmarResetTokenController(Resource):
+    def post(self):
+        data = request.get_json()
+        serializador = ConfirmarResetTokenSerializer()
+        try:
+            dataValidada = serializador.load(data)
+            #loads convierte un string en diccionario
+            informacion = loads(desencriptarTexto(dataValidada.get('token')))
+            usuarioEncontrado = conexion.session.query(UsuarioModel).where(UsuarioModel.correo == informacion.get("correo")).first()
+            if not usuarioEncontrado:
+                return {
+                    'message':'Usuario no existe'
+                },400
+
+            serializer = RegistroSerializer()
+            resultado = serializer.dump(usuarioEncontrado)
+            return{
+                'content':resultado
+            }
+        except ValidationError as error:
+            return {
+                'message':'Error al hacer el request',
+                'content': error.args
+            },400
         
+
+class ConfirmarResetPasswordController(Resource):
+    def post(self):
+        data = request.get_json()
+        serializador = ConfirmarResetPasswordSerializer()
+
+        try:
+            dataValidada = serializador.load(data)
+            informacion = loads(desencriptarTexto(dataValidada.get('token')))
+            
+            usuarioEncontrado = conexion.session.query(UsuarioModel).where(UsuarioModel.correo == informacion.get("correo")).first()
+            if not usuarioEncontrado:
+                return {
+                    'message':'Usuario no existe'
+                },400
+            
+            salt = gensalt()
+            passwordNueva = dataValidada.get("nuevaPassword")
+            passwordNuevaBytes = bytes(passwordNueva,'utf-8')
+            hash = hashpw(passwordNuevaBytes,salt)
+            hashString = hash.decode('utf-8')
+            
+            usuarioEncontrado.password = hashString
+
+            conexion.session.commit()
+
+            return {
+                'message':'Password modificada exitosamente'
+            },200
+            
+
+        except ValidationError as error:
+            return {
+                'message':'Error al cambiar la password',
+                'content':error.args
+            },400

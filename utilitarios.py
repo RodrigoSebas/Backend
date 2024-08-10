@@ -3,6 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
 from os import environ
+from cryptography.fernet import Fernet
 
 def serializadorPaginacion(total:int,pagina:int,porPagina:int):
     itemsPorPagina = porPagina if total >= porPagina else total
@@ -55,6 +56,16 @@ def enviarCorreo(destinatario, titulo, texto, html):
     print("Correo enviado exitosamente")
 
 
+def encriptarTexto(texto):
+    fernet = Fernet(environ.get("FERNET_KEY"))
 
-    
+    textoEncriptado = fernet.encrypt(bytes(texto, 'utf-8'))
 
+    return textoEncriptado.decode('utf-8')    
+
+def desencriptarTexto(textoEncriptado):
+    print(textoEncriptado)
+    fernet = Fernet(environ.get("FERNET_KEY"))
+    texto = fernet.decrypt(textoEncriptado)
+
+    return texto
