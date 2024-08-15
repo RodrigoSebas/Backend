@@ -1,0 +1,3 @@
+django-admin starproject NOMBRE_PROYECTO > creara el proyecto con el nombre dado
+
+django-admin startapp NOMBRE_APLICACION > se debe ejecutar dentro del proyecto y creara la NOMBRE_APLICACION
