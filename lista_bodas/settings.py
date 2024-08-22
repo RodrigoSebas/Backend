@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'gestion',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -72,11 +75,15 @@ WSGI_APPLICATION = 'lista_bodas.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+from os import environ
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': environ.get('DATABASE_NAME'),
+        'USER': environ.get('DATABASE_USER'),
+        'PASSWORD': environ.get('DATABASE_PASSWORD'),
+        'PORT': environ.get('DATABASE_PORT'),
+        'HOST': environ.get('DATABASE_HOST')
     }
 }
 
@@ -121,3 +128,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#nuevo
+#esta variable sirve para indicar que modelo de usuario usaremos
+
+AUTH_USER_MODEL = 'gestion.Usuario'
