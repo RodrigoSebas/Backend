@@ -2,4 +2,4 @@ venv04
 venv06
 venv
 .env
-
+__pycache__

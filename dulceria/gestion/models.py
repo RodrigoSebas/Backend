@@ -16,7 +16,7 @@ class Golosina(models.Model):
     id = models.AutoField(primary_key=True, unique=True, null=False)
     nombre = models.TextField(null=False)
     precio = models.FloatField()
-    imagen = models.ImageField(upload_to='/imagenes', null=True)
+    imagen = models.ImageField(upload_to='imagenes', null=True)
     habilitado = models.BooleanField(default=True)
     
     # on_delete > que va a suceder con los registros que tengan relacion con la categoria eliminada

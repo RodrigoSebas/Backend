@@ -1,3 +1,9 @@
 django-admin starproject NOMBRE_PROYECTO > creara el proyecto con el nombre dado
 
 django-admin startapp NOMBRE_APLICACION > se debe ejecutar dentro del proyecto y creara la NOMBRE_APLICACION
+
+python3 manage.py makemigrations NOMBRE_APLICACION --name creacion_tablas_golosina_y_categorias > crea las migraciones 
+
+python3 manage.py migrate > ejecuta las migraciones
+
+python3 manage.py showmigrations > muestra las migraciones del proyecto
