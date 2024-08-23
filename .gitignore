@@ -3,3 +3,4 @@ venv04
 venv06
 venv07
 *.pyc
+.env
