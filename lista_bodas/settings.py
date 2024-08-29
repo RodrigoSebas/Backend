@@ -13,8 +13,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 from os import environ
+from cloudinary import config
+from datetime import timedelta
 
 load_dotenv()
+
+config(cloud_name=environ.get('CLOUDINARY_NAME'),
+       api_key=environ.get('CLOUDINARY_API_KEY'),
+       api_secret=environ.get('CLOUDINARY_API_SECRET'))
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -84,11 +90,11 @@ WSGI_APPLICATION = 'lista_bodas.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': environ.get('DATABASE_NAME'),
-        'USER': environ.get('DATABASE_USER'),
-        'PASSWORD': environ.get('DATABASE_PASSWORD'),
-        'PORT': environ.get('DATABASE_PORT'),
-        'HOST': environ.get('DATABASE_HOST')
+        'NAME': environ.get('DB_NAME'),
+        'USER': environ.get('DB_USER'),
+        'PASSWORD': environ.get('DB_PASSWORD'),
+        'PORT': environ.get('DB_PORT'),
+        'HOST': environ.get('DB_HOST')
     }
 }
 
@@ -96,7 +102,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORBVALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
@@ -138,3 +144,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #esta variable sirve para indicar que modelo de usuario usaremos
 
 AUTH_USER_MODEL = 'gestion.Usuario'
+
+
+#todas las configuraciones del django rest framework
+#autenticaciones, paginaciones, filtrados, tamanio de pagina
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+
+    ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME':timedelta(hours=1)
+}
