@@ -12,3 +12,50 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Receta {
+  //@id indica que la columna sera llave primaria
+  //@db sirve para indicar con mayor precision que tipo de dato sera
+  // DataType? indica que la columna puede tener valores nulos
+  id          Int      @id @default(autoincrement())
+  nombre      String   @db.Text
+  descripcion String?
+  habilitado  Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  ingredientes  Ingrediente[]
+  preparaciones Preparacion[]
+  //los [] es de uno o muchos, uno o varios ingredientes
+
+  // si queremos cambiar el noombre de la tabla en la bd
+  // siempre que queramos modificar algo de la tabla se usa @@
+  // pero si es algo relacionado a la columna se usa @
+  @@map("recetas")
+}
+
+model Ingrediente {
+  id       Int    @id @default(autoincrement())
+  titulo   String
+  recetaId Int    @map("receta_id")
+  receta   Receta @relation(fields: [recetaId], references: [id])
+
+  @@map("Ingredientes")
+}
+
+model Preparacion {
+  id          Int    @id @default(autoincrement())
+  orden       Int
+  descripcion String
+  //@updatedAt sirve para que automaticamente cuando se modifique un 
+  //registro en la bd se actualize a la hora actual del servidor
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  recetaId    Int    @map("receta_id")
+  receta      Receta @relation(fields: [recetaId], references: [id])
+
+  // unique es para que las combinaciones orden, recetaId no se repitan
+  // por ejemplo si tenemos orden 1 y recetaId 1 no podemos volver 
+  // a tener ese misma combinacion
+  @@unique([orden, recetaId])
+  @@map("preparaciones")
+}
