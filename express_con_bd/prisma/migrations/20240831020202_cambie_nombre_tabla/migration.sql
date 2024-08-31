@@ -1,1 +1,0 @@
-ALTER TABLE "Ingredientes" TO ingredientes;
