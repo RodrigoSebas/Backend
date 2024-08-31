@@ -39,7 +39,7 @@ model Ingrediente {
   recetaId Int    @map("receta_id")
   receta   Receta @relation(fields: [recetaId], references: [id])
 
-  @@map("Ingredientes")
+  @@map("ingredientes")
 }
 
 model Preparacion {
