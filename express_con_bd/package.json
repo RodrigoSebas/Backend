@@ -4,7 +4,8 @@
   "description": "recetas de postres",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "start": "node  src/index.js"
   },
   "type": "module",
   "author": "Rodrigo Trujillo Mirano",
