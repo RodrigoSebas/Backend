@@ -70,6 +70,7 @@ model Partido {
   fecha           Fecha  @relation(fields: [fechaId], references: [id])
   equipoLocal     Equipo @relation(fields: [equipoLocalId], references: [id], name: "equipo_local")
   equipoVisitante Equipo @relation(fields: [equipoVisitanteId], references: [id], name: "equipo_visitante")
+
   @@map("partidos")
 }
 

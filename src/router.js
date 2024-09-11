@@ -7,7 +7,11 @@ import {
   perfilUsuario,
 } from "./controllers/usuario.controller.js";
 import { validarToken, validarAdmin } from "./utils.js";
-import { generarUrlFirmada, crearImagen, devolverImagen } from "./controllers/imagen.controller.js";
+import {
+  generarUrlFirmada,
+  crearImagen,
+  devolverImagen,
+} from "./controllers/imagen.controller.js";
 
 export const rutas = Router();
 
@@ -28,6 +32,6 @@ rutas
 
 rutas.route("/generar-url").post(asyncHandler(generarUrlFirmada));
 
-rutas.route("/imagen").post(asyncHandler(crearImagen))
+rutas.route("/imagen").post(asyncHandler(crearImagen));
 
 rutas.route("/image/:id").get(asyncHandler(devolverImagen));
