@@ -10,6 +10,7 @@ export const crearEquipo = async (req, res) => {
             content: error.details,
         });
     }
+    
 
     const equipoCreado = await conexion.equipo.create({
         data: {
@@ -17,6 +18,17 @@ export const crearEquipo = async (req, res) => {
             imagen: value.imagen
         }
     })
+
+    if(value.imagenId) {
+        const imagenEncontrada = await conexion.imagen.findUniqueOrThrow({
+            where: {id: value.imagenId},
+            select: {id:true}
+        })
+        await conexion.imagen.update({
+            where: {id: imagenEncontrada.id},
+            data: {equipo: {connect: { id: equipoCreado.id}}}
+        })
+    }
 
     return res.status(201).json({
         message:"Equipo creado exitosamente",

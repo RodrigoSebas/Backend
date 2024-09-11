@@ -1,7 +1,8 @@
 import jsonwebtoken from "jsonwebtoken";
 import { conexion } from "./instancias.js";
 import { USUARIO_ROL } from "@prisma/client";
-//middleware manual
+
+//middlewares manual
 export const validarToken = async (req, res, next) => {
   const authorization = req.headers.authorization;
 

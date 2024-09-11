@@ -6,15 +6,16 @@ import {
   login,
   perfilUsuario,
 } from "./controllers/usuario.controller.js";
-import { validarToken,validarAdmin } from "./utils.js";
+import { validarToken, validarAdmin } from "./utils.js";
+import { generarUrlFirmada, crearImagen, devolverImagen } from "./controllers/imagen.controller.js";
 
 export const rutas = Router();
 
 rutas
   .route("/equipos")
   .post(
-    asyncHandler(validarToken),
-    asyncHandler(validarAdmin),
+    //asyncHandler(validarToken),
+    //asyncHandler(validarAdmin),
     asyncHandler(crearEquipo)
   )
   .get(asyncHandler(listarEquipos));
@@ -24,3 +25,9 @@ rutas.route("/login").post(asyncHandler(login));
 rutas
   .route("/perfil")
   .get(asyncHandler(validarToken), asyncHandler(perfilUsuario));
+
+rutas.route("/generar-url").post(asyncHandler(generarUrlFirmada));
+
+rutas.route("/imagen").post(asyncHandler(crearImagen))
+
+rutas.route("/image/:id").get(asyncHandler(devolverImagen));
