@@ -1,6 +1,7 @@
 import AWS from "aws-sdk";
 import { imagenSerializer } from "../serializers/imagen.serializer.js";
 import { conexion } from "../instancias.js";
+import {v4} from "uuid"
 
 export const generarUrlFirmada = async (req, res) => {
   const { error, value } = imagenSerializer.validate(req.body);
@@ -12,19 +13,20 @@ export const generarUrlFirmada = async (req, res) => {
   }
 
   const { key, path, contentType, extension } = value;
+  const nuevaKey = `${v4()}-${key}`;
   const s3 = new AWS.S3();
   // getObject > obtener un archivo del s3
   //putObject > generar una url para subir un archivo al s3
   //deleteObject > eliminar un archivo del s3
   const url = s3.getSignedUrl("putObject", {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${path ? `${path}/` : ""}/${key}.${extension}`,
+    Key: `${path ? `${path}/` : ""}/${nuevaKey}.${extension}`,
     Expires: 60,
     ContentType: contentType,
   });
 
   return res.json({
-    content: url,
+    content: {url, key: nuevaKey}
   });
 };
 
@@ -55,7 +57,7 @@ export const devolverImagen = async (req, res) => {
   });
   const s3 = new AWS.S3();
 
-  s3.getSignedUrl("getObject", {
+  const url = s3.getSignedUrl("getObject", {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: imagenEncontrada.key,
     Expires: 100,
@@ -65,3 +67,22 @@ export const devolverImagen = async (req, res) => {
     content: url
   });
 };
+
+export const devolverImagenEquipo = async (req,res) => {
+  const {id} = req.params;
+
+  const imagenEncontrada = await conexion.imagen.findUniqueOrThrow({
+    where: { id },
+  });
+  const s3 = new AWS.S3();
+
+  const url = s3.getSignedUrl("getObject", {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `${iagenEncontrada.path}` ? `${s}`,
+    Expires: 100,
+  })
+
+  return res.json({
+    content: url
+  });
+}

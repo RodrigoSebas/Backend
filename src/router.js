@@ -11,6 +11,7 @@ import {
   generarUrlFirmada,
   crearImagen,
   devolverImagen,
+  devolverImagenEquipo
 } from "./controllers/imagen.controller.js";
 
 export const rutas = Router();
@@ -35,3 +36,5 @@ rutas.route("/generar-url").post(asyncHandler(generarUrlFirmada));
 rutas.route("/imagen").post(asyncHandler(crearImagen));
 
 rutas.route("/image/:id").get(asyncHandler(devolverImagen));
+
+rutas.route("/imagen/equipo/:id").get(asyncHandler(devolverImagenEquipo))
