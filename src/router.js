@@ -31,6 +31,7 @@ rutas
   .route("/perfil")
   .get(asyncHandler(validarToken), asyncHandler(perfilUsuario));
 
+  
 rutas.route("/generar-url").post(asyncHandler(generarUrlFirmada));
 
 rutas.route("/imagen").post(asyncHandler(crearImagen));
